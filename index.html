@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>عَالَمُ الْحَيَوَانَاتِ - Alam Hewan</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Noto+Naskh+Arabic:wght@600;700&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg1: #bfe9ff; --bg2: #7ed957; --card: #fffdf6;
+    --primary: #ff8800; --primary-d: #d66c00;
+    --secondary: #17a2b8; --secondary-d: #117a8b;
+    --green: #28a745; --green-d: #1e7e34;
+    --purple: #6f42c1; --text: #2c3e50;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Nunito', sans-serif; }
+  body {
+    margin: 0; min-height: 100vh; color: var(--text);
+    background: linear-gradient(180deg, var(--bg1) 0%, #ebf9ff 60%, var(--bg2) 100%);
+    background-attachment: fixed; display: flex; justify-content: center; padding: 12px;
+  }
+  .app { width: 100%; max-width: 820px; margin: auto; }
+  .ar { font-family: 'Noto Naskh Arabic', serif; direction: rtl; unicode-bidi: isolate; }
+  h1, h2, h3, .btn { font-family: 'Fredoka', 'Nunito', sans-serif; }
+  
+  .hud {
+    background: rgba(255,255,255,0.92); border-radius: 18px; padding: 10px 16px;
+    display: flex; justify-content: space-between; align-items: center; gap: 8px;
+    margin-bottom: 12px; box-shadow: 0 6px 18px rgba(0,0,0,0.07); flex-wrap: wrap;
+  }
+  .hud-badge {
+    background: #fff3cd; border: 2px solid #ffeeba; border-radius: 50px;
+    padding: 6px 12px; font-weight: 800; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 6px;
+  }
+  .hud-score { background: #d4edda; border-color: #c3e6cb; color: #155724; }
+  
+  .card {
+    background: var(--card); border: 4px solid #fff; border-radius: 26px;
+    padding: 20px; box-shadow: 0 10px 24px rgba(0,0,0,0.09); text-align: center;
+  }
+  
+  .btn {
+    border: none; border-radius: 16px; padding: 10px 18px; font-size: 1rem;
+    font-weight: 700; cursor: pointer; display: inline-flex; align-items: center;
+    justify-content: center; gap: 6px; transition: transform 0.1s; user-select: none;
+  }
+  .btn:active { transform: translateY(3px); }
+  .btn-primary { background: var(--primary); color: #fff; box-shadow: 0 4px 0 var(--primary-d); }
+  .btn-secondary { background: var(--secondary); color: #fff; box-shadow: 0 4px 0 var(--secondary-d); }
+  .btn-green { background: var(--green); color: #fff; box-shadow: 0 4px 0 var(--green-d); }
+  .btn-purple { background: var(--purple); color: #fff; box-shadow: 0 4px 0 #522d94; }
+  .btn-soft { background: #fff; border: 2px solid #e2e8f0; color: #475569; box-shadow: 0 4px 0 #cbd5e1; }
+  .btn-sm { padding: 6px 12px; font-size: 0.88rem; border-radius: 12px; }
+
+  .stage {
+    width: 170px; height: 170px; margin: 10px auto; border-radius: 24px;
+    background: radial-gradient(circle, #fff 40%, #e0f4ff 100%);
+    border: 3px solid #bde4ff; display: flex; align-items: center; justify-content: center;
+  }
+  .stage svg { width: 130px; height: 130px; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0; }
+  .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin: 14px 0; }
+  @media(max-width: 520px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  .opt-card {
+    background: #fff; border: 3px solid #e0e8f0; border-radius: 18px; padding: 12px;
+    cursor: pointer; transition: 0.15s; font-size: 1.15rem; font-weight: 800;
+  }
+  .opt-card:active { transform: scale(0.97); }
+  .opt-card.correct { background: #d4edda !important; border-color: #28a745 !important; color: #155724; }
+  .opt-card.wrong { background: #f8d7da !important; border-color: #dc3545 !important; color: #721c24; }
+
+  .slot-zone {
+    min-height: 58px; background: #f8fafc; border: 3px dashed #cbd5e1;
+    border-radius: 18px; padding: 8px; display: flex; gap: 8px; justify-content: center;
+    align-items: center; flex-wrap: wrap; margin: 10px 0;
+  }
+  .word-chip {
+    background: #fff; border: 2px solid #3b82f6; border-radius: 12px;
+    padding: 8px 16px; font-size: 1.25rem; font-weight: 800; cursor: pointer;
+    box-shadow: 0 3px 0 #1d4ed8;
+  }
+  
+  .chat-bubble {
+    border-radius: 20px; padding: 12px 18px; margin: 8px 0; font-size: 1.2rem;
+    display: inline-block; max-width: 85%;
+  }
+  .chat-a { background: #e0f2fe; border: 2px solid #bae6fd; text-align: right; float: right; clear: both; }
+  .chat-b { background: #dcfce7; border: 2px solid #bbf7d0; text-align: left; float: left; clear: both; }
+
+  .toast {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    background: #222; color: #fff; padding: 10px 22px; border-radius: 50px;
+    font-weight: 700; z-index: 99; opacity: 0; pointer-events: none; transition: 0.3s;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(-8px); }
+
+  .cert {
+    background: #fffdf5; border: 8px double #d4af37; border-radius: 20px;
+    padding: 24px; margin: 16px 0; box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hud" id="hud" style="display:none;">
+    <div style="display:flex; gap:8px; align-items:center;">
+      <button class="btn btn-soft btn-sm" onclick="showView('menu')">🏠 Menu</button>
+      <span class="hud-badge" id="hud-name">👤 Pemain</span>
+    </div>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <span class="hud-badge hud-score" id="hud-score">⭐ Skor: 0</span>
+      <span class="hud-badge" id="hud-stars">🌟 0/5</span>
+      <button class="btn btn-soft btn-sm" onclick="toggleBgm()" id="bgm-btn">🎵 Musik: Mati</button>
+    </div>
+  </div>
+
+  <main id="main-content" class="card"></main>
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+// --- 1. DATA MASTER HEWAN (8 MUFRADAT LENGKAP HARAKAT) ---
+const ANIMALS = [
+  { id: 'bird', ar: 'طَيْرٌ', idName: 'Burung', isFem: false, color: '#0ea5e9',
+    svg: '<circle cx="50" cy="50" r="32" fill="#38bdf8"/><circle cx="62" cy="42" r="4" fill="#000"/><polygon points="76,46 95,50 76,58" fill="#f59e0b"/><polygon points="20,44 42,52 30,68" fill="#0284c7"/>' },
+  { id: 'chicken', ar: 'دَجَاجَةٌ', idName: 'Ayam', isFem: true, color: '#ef4444',
+    svg: '<ellipse cx="50" cy="54" rx="30" ry="26" fill="#f87171"/><path d="M42,26 Q50,14 58,26" fill="#dc2626"/><circle cx="62" cy="46" r="3.5" fill="#000"/><polygon points="74,50 88,54 74,60" fill="#f59e0b"/><path d="M64,62 Q66,70 60,70" fill="#dc2626"/>' },
+  { id: 'goose', ar: 'إِوَزَّةٌ', idName: 'Angsa', isFem: true, color: '#94a3b8',
+    svg: '<path d="M25,65 Q45,35 60,35 Q75,35 65,55 Q85,55 80,75 Q60,85 25,65 Z" fill="#e2e8f0"/><circle cx="68" cy="38" r="3" fill="#000"/><polygon points="74,38 92,42 74,48" fill="#ea580c"/>' },
+  { id: 'goat', ar: 'مَاعِزٌ', idName: 'Kambing', isFem: false, color: '#d97706',
+    svg: '<ellipse cx="50" cy="56" rx="32" ry="24" fill="#d97706"/><circle cx="48" cy="38" r="18" fill="#b45309"/><circle cx="42" cy="36" r="3" fill="#000"/><circle cx="54" cy="36" r="3" fill="#000"/><polygon points="40,24 34,10 44,22" fill="#78350f"/><polygon points="56,24 62,10 52,22" fill="#78350f"/><path d="M48,50 Q48,60 44,60" stroke="#78350f" stroke-width="3" fill="none"/>' },
+  { id: 'cat', ar: 'قِطٌّ', idName: 'Kucing', isFem: false, color: '#f59e0b',
+    svg: '<circle cx="50" cy="54" r="28" fill="#f59e0b"/><polygon points="28,34 32,16 44,28" fill="#d97706"/><polygon points="72,34 68,16 56,28" fill="#d97706"/><circle cx="40" cy="50" r="4" fill="#000"/><circle cx="60" cy="50" r="4" fill="#000"/><circle cx="50" cy="58" r="3" fill="#e11d48"/><line x1="34" y1="58" x2="16" y2="54" stroke="#000" stroke-width="2"/><line x1="66" y1="58" x2="84" y2="54" stroke="#000" stroke-width="2"/>' },
+  { id: 'rabbit', ar: 'أَرْنَبٌ', idName: 'Kelinci', isFem: false, color: '#ec4899',
+    svg: '<circle cx="50" cy="60" r="26" fill="#fbcfe8"/><ellipse cx="38" cy="24" rx="7" ry="20" fill="#f472b6"/><ellipse cx="62" cy="24" rx="7" ry="20" fill="#f472b6"/><circle cx="42" cy="56" r="3.5" fill="#000"/><circle cx="58" cy="56" r="3.5" fill="#000"/><circle cx="50" cy="64" r="3" fill="#e11d48"/>' },
+  { id: 'fish', ar: 'سَمَكَةٌ', idName: 'Ikan', isFem: true, color: '#06b6d4',
+    svg: '<ellipse cx="48" cy="50" rx="30" ry="20" fill="#22d3ee"/><polygon points="74,50 94,34 94,66" fill="#0891b2"/><circle cx="34" cy="46" r="4" fill="#000"/><path d="M48,40 Q56,50 48,60" stroke="#0891b2" stroke-width="3" fill="none"/>' },
+  { id: 'duck', ar: 'بَطَّةٌ', idName: 'Bebek', isFem: true, color: '#eab308',
+    svg: '<circle cx="52" cy="52" r="26" fill="#facc15"/><circle cx="46" cy="46" r="3.5" fill="#000"/><path d="M68,48 Q88,48 84,58 Q70,58 68,52 Z" fill="#ea580c"/>' }
+];
+
+// --- 2. SISTEM STATE & PENYIMPANAN AMAN ---
+const STORAGE_KEY = 'alam_hewan_sd3_save';
+let state = {
+  playerName: 'Siswa Juara',
+  score: 0,
+  completedLevels: [0,0,0,0,0],
+  unlockedLevel: 1,
+  favoriteAnimal: null
+};
+
+function loadSavedData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw) state = Object.assign(state, JSON.parse(raw));
+  } catch(e) { console.warn('Penyimpanan lokal nonaktif:', e); }
+}
+
+function saveData() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e){}
+  updateHud();
+}
+
+function resetData() {
+  if(!confirm('Apakah kamu yakin ingin mengulang permainan dari awal?')) return;
+  state = { playerName: 'Siswa Juara', score: 0, completedLevels: [0,0,0,0,0], unlockedLevel: 1, favoriteAnimal: null };
+  saveData();
+  showView('menu');
+  showToast('Progres berhasil direset!');
+}
+
+// --- 3. AUDIO ENGINE (Web Audio API & Web Speech API) ---
+const AudioEngine = {
+  ctx: null,
+  bgmGain: null,
+  bgmRunning: false,
+  step: 0,
+
+  init() {
+    if(!this.ctx) {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if(AudioContext) this.ctx = new AudioContext();
+    }
+    if(this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+  },
+
+  playBeep(freq, type, dur, delay=0) {
+    this.init();
+    if(!this.ctx) return;
+    const osc = this.ctx.createOscillator();
+    const g = this.ctx.createGain();
+    const t = this.ctx.currentTime + delay;
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, t);
+    g.gain.setValueAtTime(0.18, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    osc.connect(g);
+    g.connect(this.ctx.destination);
+    osc.start(t);
+    osc.stop(t + dur);
+  },
+
+  playCorrect() {
+    this.playBeep(523.25, 'triangle', 0.12, 0);
+    this.playBeep(659.25, 'triangle', 0.12, 0.1);
+    this.playBeep(783.99, 'triangle', 0.25, 0.2);
+  },
+
+  playWrong() {
+    this.playBeep(260, 'sawtooth', 0.16, 0);
+    this.playBeep(200, 'sawtooth', 0.22, 0.14);
+  },
+
+  toggleBgm() {
+    this.init();
+    this.bgmRunning = !this.bgmRunning;
+    const btn = document.getElementById('bgm-btn');
+    if(btn) btn.innerText = this.bgmRunning ? '🎵 Musik: Nyala' : '🎵 Musik: Mati';
+    if(this.bgmRunning) this.loopBgm();
+  },
+
+  loopBgm() {
+    if(!this.bgmRunning || !this.ctx) return;
+    const melody = [261.63, 329.63, 392.00, 329.63, 261.63, 392.00, 349.23, 293.66];
+    const freq = melody[this.step % melody.length];
+    this.step++;
+
+    const osc = this.ctx.createOscillator();
+    const g = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+    g.gain.setValueAtTime(0.04, this.ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.38);
+    osc.connect(g);
+    g.connect(this.ctx.destination);
+    osc.start();
+    osc.stop(this.ctx.currentTime + 0.4);
+
+    setTimeout(() => this.loopBgm(), 420);
+  },
+
+  speak(text, lang='ar') {
+    if(!('speechSynthesis' in window)) {
+      showToast('Browser belum mendukung suara otomatis.');
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = 0.82;
+    u.pitch = 1.05;
+
+    const voices = window.speechSynthesis.getVoices();
+    if(lang === 'ar') {
+      u.lang = 'ar-SA';
+      const arVoice = voices.find(v => v.lang.startsWith('ar'));
+      if(arVoice) u.voice = arVoice;
+    } else {
+      u.lang = 'id-ID';
+      const idVoice = voices.find(v => v.lang.startsWith('id'));
+      if(idVoice) u.voice = idVoice;
+    }
+    window.speechSynthesis.speak(u);
+  }
+};
+
+function toggleBgm() { AudioEngine.toggleBgm(); }
+function speakAr(text) { AudioEngine.speak(text, 'ar'); }
+function speakId(text) { AudioEngine.speak(text, 'id'); }
+
+// --- 4. TAMPILAN DAN NAVIGASI ---
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.innerText = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function updateHud() {
+  document.getElementById('hud-name').innerText = '👤 ' + state.playerName;
+  document.getElementById('hud-score').innerText = '⭐ Skor: ' + state.score;
+  const starsCount = state.completedLevels.reduce((a,b) => a+b, 0);
+  document.getElementById('hud-stars').innerText = '🌟 ' + starsCount + '/5';
+}
+
+function showView(view, param=0) {
+  AudioEngine.init();
+  const hud = document.getElementById('hud');
+  const main = document.getElementById('main-content');
+  hud.style.display = (view === 'cover') ? 'none' : 'flex';
+  updateHud();
+
+  if(view === 'cover') renderCover(main);
+  else if(view === 'menu') renderMenu(main);
+  else if(view === 'guide') renderGuide(main);
+  else if(view === 'study') renderStudy(main, param);
+  else if(view === 'lvl1') renderLevel1(main, param);
+  else if(view === 'lvl2') renderLevel2(main, param);
+  else if(view === 'lvl3') renderLevel3(main, param);
+  else if(view === 'lvl4') renderLevel4(main, param);
+  else if(view === 'lvl5') renderLevel5(main);
+  else if(view === 'cert') renderCertificate(main);
+}
+
+function addScore(pts) {
+  state.score += pts;
+  saveData();
+  AudioEngine.playCorrect();
+  showToast('Hebat! +' + pts + ' Poin');
+}
+
+function finishLevel(lvlIndex) {
+  state.completedLevels[lvlIndex - 1] = 1;
+  if(state.unlockedLevel <= lvlIndex && lvlIndex < 5) {
+    state.unlockedLevel = lvlIndex + 1;
+  }
+  saveData();
+  AudioEngine.playCorrect();
+}
+
+function getAnimalSvg(item) {
+  return `<svg viewBox="0 0 100 100">${item.svg}</svg>`;
+}
+
+// --- 5. HALAMAN UTAMA / COVER ---
+function renderCover(el) {
+  el.innerHTML = `
+    <h1 class="ar" style="font-size: clamp(2rem, 6vw, 3rem); color:#d96b00; margin:6px 0;">عَالَمُ الْحَيَوَانَاتِ</h1>
+    <h2 style="color:#0284c7; margin:0 0 10px;">ALAM HEWAN</h2>
+    <p style="font-size:1.05rem; font-weight:800; color:#5c6b73; margin-bottom:16px;">
+      Petualangan Seru Mengenal Nama-Nama Hewan dalam Bahasa Arab<br>(Untuk Siswa SD/MI Kelas 3)
+    </p>
+
+    <div class="stage" style="width:140px; height:140px; margin:auto;">
+      <svg viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="42" fill="#ffd166"/>
+        <circle cx="36" cy="44" r="5" fill="#000"/>
+        <circle cx="64" cy="44" r="5" fill="#000"/>
+        <path d="M40,62 Q50,74 60,62" stroke="#000" stroke-width="4" fill="none"/>
+        <polygon points="50,15 36,32 64,32" fill="#ef476f"/>
+      </svg>
+    </div>
+    <p style="font-weight:800; color:#b45309; margin:8px 0 16px;">Halo! Aku <b>Zaki</b>, maskot petualanganmu!</p>
+
+    <div style="max-width:320px; margin:0 auto 16px;">
+      <label style="display:block; font-weight:800; margin-bottom:6px;">Tulis Nama Pemain:</label>
+      <input type="text" id="player-input" value="${state.playerName}" maxlength="20"
+        style="width:100%; padding:10px 14px; border:3px solid #bde4ff; border-radius:14px; font-size:1.1rem; text-align:center; font-weight:800; outline:none;" />
+    </div>
+
+    <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="startPlay()">🚀 Mulai Bermain</button>
+      <button class="btn btn-secondary" onclick="showView('guide')">📖 Petunjuk</button>
+    </div>
+  `;
+}
+
+function startPlay() {
+  const inp = document.getElementById('player-input');
+  if(inp && inp.value.trim()) state.playerName = inp.value.trim();
+  saveData();
+  showView('menu');
+}
+
+// --- 6. MENU UTAMA LEVEL ---
+function renderMenu(el) {
+  const stars = state.completedLevels.reduce((a,b)=>a+b, 0);
+  let tiles = '';
+  
+  const lvls = [
+    { n: 1, title: 'Level 1: Kenali Hewan', desc: 'Mengenal 8 nama hewan & suaranya' },
+    { n: 2, title: 'Level 2: Tebak Nama', desc: 'Tanya jawab مَا هَذَا؟ / مَا هَذِهِ؟' },
+    { n: 3, title: 'Level 3: Susun Kata', desc: 'Menyusun kalimat هَذَا / هَذِهِ' },
+    { n: 4, title: 'Level 4: Percakapan', desc: 'Latihan percakapan هَلْ عِنْدَكَ ...؟' },
+    { n: 5, title: 'Level 5: Hewan Favorit', desc: 'Membuat kalimat & Sertifikat' }
+  ];
+
+  lvls.forEach((l, i) => {
+    const isUnlocked = state.unlockedLevel >= l.n;
+    const isDone = state.completedLevels[i] === 1;
+    tiles += `
+      <div style="background:#fff; border:3px solid ${isDone?'#86efac':(isUnlocked?'#bae6fd':'#e2e8f0')}; border-radius:18px; padding:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; opacity:${isUnlocked?1:0.6};">
+        <div style="text-align:left;">
+          <h3 style="margin:0; color:${isDone?'#15803d':'#0284c7'}; font-size:1.1rem;">${l.title} ${isDone?'⭐':''}</h3>
+          <p style="margin:2px 0 0; font-size:0.9rem; color:#64748b;">${l.desc}</p>
+        </div>
+        <button class="btn ${isDone?'btn-green':(isUnlocked?'btn-primary':'btn-soft')} btn-sm"
+          ${isUnlocked ? `onclick="showView('lvl${l.n}')"` : 'disabled'}>
+          ${isDone ? 'Main Lagi' : (isUnlocked ? 'Mulai' : 'Terkunci 🔒')}
+        </button>
+      </div>
+    `;
+  });
+
+  el.innerHTML = `
+    <h2 style="color:#0284c7; margin-top:0;">Pilih Level Petualangan</h2>
+    <div style="margin-bottom:14px;">${tiles}</div>
+    <div style="display:flex; justify-content:center; gap:8px; flex-wrap:wrap;">
+      <button class="btn btn-purple btn-sm" onclick="showView('study',0)">📚 Mode Belajar Bebas</button>
+      ${stars === 5 ? `<button class="btn btn-green btn-sm" onclick="showView('cert')">🎓 Sertifikat</button>` : ''}
+      <button class="btn btn-soft btn-sm" onclick="resetData()">🔄 Ulangi Dari Awal</button>
+    </div>
+  `;
+}
+
+// --- 7. PETUNJUK PERMAINAN ---
+function renderGuide(el) {
+  el.innerHTML = `
+    <h2 style="color:#0284c7; margin-top:0;">Petunjuk Permainan</h2>
+    <div style="text-align:left; font-size:0.98rem; line-height:1.6; max-width:650px; margin:auto; background:#fff; padding:16px; border-radius:18px; border:2px solid #e2e8f0;">
+      <p>1. <b>Level 1 (Kenali Hewan):</b> Dengarkan dan ikuti pelafalan 8 nama hewan dalam Bahasa Arab.</p>
+      <p>2. <b>Level 2 (Tebak Nama):</b> Jawab pertanyaan <i>مَا هَذَا؟ / مَا هَذِهِ؟</i> dengan memilih 1 dari 4 pilihan.</p>
+      <p>3. <b>Level 3 (Susun Kata):</b> Susun potongan kata menjadi pola kalimat <i>هَذَا ... / هَذِهِ ...</i> yang benar.</p>
+      <p>4. <b>Level 4 (Percakapan):</b> Jawab pertanyaan teman dengan ungkapan <i>نَعَمْ، عِنْدِي ...</i> atau <i>لَا، لَيْسَ عِنْدِي ...</i>.</p>
+      <p>5. <b>Level 5 (Favorit):</b> Pilih hewan yang kamu sukai untuk membuat kalimat <i>أُحِبُّ ...</i> dan dapatkan sertifikat!</p>
+      <p>⭐ Setiap jawaban benar bernilai <b>+10 poin</b>. Jawaban salah tidak mengurangi poin.</p>
+    </div>
+    <div style="margin-top:16px;">
+      <button class="btn btn-primary" onclick="showView('menu')">Kembali ke Menu</button>
+    </div>
+  `;
+}
+
+// --- 8. MODE BELAJAR BEBAS ---
+function renderStudy(el, idx) {
+  const a = ANIMALS[idx];
+  el.innerHTML = `
+    <h3 style="color:#6f42c1; margin:0;">Mode Belajar Kosakata (${idx+1}/8)</h3>
+    <div class="stage">${getAnimalSvg(a)}</div>
+    <div class="ar" style="font-size:2.6rem; color:#d96b00; font-weight:700;">${a.ar}</div>
+    <div style="font-size:1.35rem; font-weight:800; color:#15803d; margin-bottom:12px;">${a.idName}</div>
+    
+    <div style="display:flex; justify-content:center; gap:8px; margin-bottom:16px; flex-wrap:wrap;">
+      <button class="btn btn-secondary btn-sm" onclick="speakAr('${a.ar}')">🔊 Suara Arab</button>
+      <button class="btn btn-soft btn-sm" onclick="speakId('${a.idName}')">🇮🇩 Arti Bahasa Indonesia</button>
+    </div>
+
+    <div style="display:flex; justify-content:center; gap:8px; flex-wrap:wrap;">
+      <button class="btn btn-soft btn-sm" ${idx>0?`onclick="showView('study',${idx-1})"`:'disabled'}>⬅️ Sebelumnya</button>
+      <button class="btn btn-primary btn-sm" ${idx<ANIMALS.length-1?`onclick="showView('study',${idx+1})"`:'disabled'}>Berikutnya ➡️</button>
+      <button class="btn btn-soft btn-sm" onclick="showView('menu')">Kembali ke Menu</button>
+    </div>
+  `;
+}
+
+// --- 9. LEVEL 1: KENALI HEWAN ---
+function renderLevel1(el, idx) {
+  const a = ANIMALS[idx];
+  el.innerHTML = `
+    <div style="font-size:0.95rem; font-weight:800; color:#0284c7;">Level 1 — Kenali Hewan (${idx+1}/8)</div>
+    <div class="stage">${getAnimalSvg(a)}</div>
+    <div class="ar" style="font-size:2.8rem; color:#d96b00; font-weight:700;">${a.ar}</div>
+    <div style="font-size:1.35rem; font-weight:800; color:#15803d; margin-bottom:14px;">${a.idName}</div>
+
+    <div style="display:flex; justify-content:center; gap:8px; margin-bottom:18px; flex-wrap:wrap;">
+      <button class="btn btn-secondary" onclick="speakAr('${a.ar}')">🔊 Dengarkan Bahasa Arab</button>
+      <button class="btn btn-soft" onclick="speakId('${a.idName}')">🇮🇩 Dengarkan Arti</button>
+    </div>
+
+    <button class="btn btn-green" onclick="nextLvl1(${idx})">
+      ${idx < ANIMALS.length - 1 ? 'Aku Sudah Hafal! Lanjut ➡️' : 'Selesaikan Level 1 🌟'}
+    </button>
+  `;
+}
+
+function nextLvl1(idx) {
+  addScore(10);
+  if(idx < ANIMALS.length - 1) {
+    showView('lvl1', idx + 1);
+  } else {
+    finishLevel(1);
+    alert('Alhamdulillah! Kamu berhasil menyelesaikan Level 1 dan mendapatkan 1 Bintang!');
+    showView('menu');
+  }
+}
+
+// --- 10. LEVEL 2: TEBAK NAMA HEWAN ---
+function renderLevel2(el, qIdx) {
+  const a = ANIMALS[qIdx];
+  const tanya = a.isFem ? 'مَا هَذِهِ؟' : 'مَا هَذَا؟';
+
+  let opts = [a];
+  while(opts.length < 4) {
+    const r = ANIMALS[Math.floor(Math.random()*ANIMALS.length)];
+    if(!opts.some(o => o.id === r.id)) opts.push(r);
+  }
+  opts.sort(() => Math.random() - 0.5);
+
+  let optsHtml = opts.map(o => `
+    <button class="opt-card ar" onclick="checkLvl2(this, '${o.id}', '${a.id}', ${qIdx})">${o.ar}</button>
+  `).join('');
+
+  el.innerHTML = `
+    <div style="font-size:0.95rem; font-weight:800; color:#0284c7;">Level 2 — Tebak Nama Hewan (${qIdx+1}/8)</div>
+    <div class="stage">${getAnimalSvg(a)}</div>
+    <div class="ar" style="font-size:1.9rem; color:#6f42c1; margin-bottom:6px;">${tanya}</div>
+    <div style="margin-bottom:10px;">
+      <button class="btn btn-soft btn-sm" onclick="speakAr('${tanya}')">🔊 Bunyi Pertanyaan</button>
+    </div>
+    <div class="grid-2">${optsHtml}</div>
+    <div id="lvl2-fb" style="font-weight:800; min-height:24px; margin-top:8px;"></div>
+  `;
+}
+
+function checkLvl2(btn, chosenId, correctId, qIdx) {
+  const fb = document.getElementById('lvl2-fb');
+  if(chosenId === correctId) {
+    btn.classList.add('correct');
+    addScore(10);
+    fb.innerHTML = '<span style="color:#15803d;">Mumtaz! Jawabanmu benar! ⭐</span>';
+    setTimeout(() => {
+      if(qIdx < ANIMALS.length - 1) showView('lvl2', qIdx + 1);
+      else {
+        finishLevel(2);
+        alert('Selamat! Level 2 selesai! Kamu dapat bintang kedua!');
+        showView('menu');
+      }
+    }, 900);
+  } else {
+    btn.classList.add('wrong');
+    AudioEngine.playWrong();
+    fb.innerHTML = '<span style="color:#b91c1c;">Belum tepat! Yuk, coba lagi ya. 😊</span>';
+  }
+}
+
+// --- 11. LEVEL 3: SUSUN KATA (HĀDZĀ / HĀDZIHĪ) ---
+function renderLevel3(el, qIdx) {
+  const a = ANIMALS[qIdx];
+  const isyarat = a.isFem ? 'هَذِهِ' : 'هَذَا';
+  const targetWords = [isyarat, a.ar];
+  
+  let shuffled = [...targetWords].sort(() => Math.random() - 0.5);
+  window.currentLvl3 = { target: targetWords.join(' '), placed: [] };
+
+  el.innerHTML = `
+    <div style="font-size:0.95rem; font-weight:800; color:#0284c7;">Level 3 — Susun Kalimat Sederhana (${qIdx+1}/8)</div>
+    <div class="stage">${getAnimalSvg(a)}</div>
+    <p style="font-weight:800; margin:4px 0 8px;">Susun kata Bahasa Arab menjadi: <i>"${isyarat === 'هَذَا' ? 'Ini (hewan jantan)' : 'Ini (hewan betina)'} ${a.idName}"</i></p>
+
+    <div class="slot-zone" id="drop-zone" onclick="unpickWord()"></div>
+    <div style="display:flex; justify-content:center; gap:10px; margin:10px 0;" id="pool-zone">
+      ${shuffled.map(w => `<button class="word-chip ar" onclick="pickWord('${w}', this)">${w}</button>`).join('')}
+    </div>
+
+    <div style="margin-top:14px; display:flex; justify-content:center; gap:8px;">
+      <button class="btn btn-green" onclick="checkLvl3(${qIdx})">Periksa Jawaban</button>
+      <button class="btn btn-soft" onclick="showView('lvl3', ${qIdx})">Reset</button>
+    </div>
+    <div id="lvl3-fb" style="font-weight:800; min-height:24px; margin-top:8px;"></div>
+  `;
+}
+
+function pickWord(word, btn) {
+  window.currentLvl3.placed.push(word);
+  btn.style.display = 'none';
+  renderSlots();
+}
+
+function renderSlots() {
+  const zone = document.getElementById('drop-zone');
+  if(!zone) return;
+  zone.innerHTML = window.currentLvl3.placed.map((w, i) => `
+    <span class="word-chip ar" style="border-color:#16a34a; background:#f0fdf4;">${w}</span>
+  `).join('');
+}
+
+function unpickWord() {
+  if(!window.currentLvl3.placed.length) return;
+  window.currentLvl3.placed = [];
+  const chips = document.querySelectorAll('#pool-zone .word-chip');
+  chips.forEach(c => c.style.display = 'inline-block');
+  renderSlots();
+}
+
+function checkLvl3(qIdx) {
+  const fb = document.getElementById('lvl3-fb');
+  const userSentence = window.currentLvl3.placed.join(' ');
+
+  if(userSentence === window.currentLvl3.target) {
+    addScore(10);
+    speakAr(userSentence);
+    fb.innerHTML = '<span style="color:#15803d;">Ahsant! Susunan kalimatmu benar! 🎉</span>';
+    setTimeout(() => {
+      if(qIdx < ANIMALS.length - 1) showView('lvl3', qIdx + 1);
+      else {
+        finishLevel(3);
+        alert('Luar biasa! Level 3 tuntas dan dapat 1 bintang!');
+        showView('menu');
+      }
+    }, 1100);
+  } else {
+    AudioEngine.playWrong();
+    fb.innerHTML = '<span style="color:#b91c1c;">Susunan belum tepat. Coba urutkan kembali dari kanan ke kiri.</span>';
+  }
+}
+
+// --- 12. LEVEL 4: AYO BERCAKAP-CAKAP ---
+const DIALOGS = [
+  { animal: ANIMALS[4], q: 'هَلْ عِنْدَكَ قِطٌّ؟', optA: 'نَعَمْ، عِنْدِي قِطٌّ.', optB: 'لَا، لَيْسَ عِنْدِي سَمَكَةٌ.', ans: 'A' },
+  { animal: ANIMALS[5], q: 'هَلْ عِنْدَكَ أَرْنَبٌ؟', optA: 'نَعَمْ، عِنْدِي بَطَّةٌ.', optB: 'لَا، لَيْسَ عِنْدِي أَرْنَبٌ.', ans: 'B' },
+  { animal: ANIMALS[1], q: 'هَلْ عِنْدَكِ دَجَاجَةٌ؟', optA: 'نَعَمْ، عِنْدِي دَجَاجَةٌ.', optB: 'نَعَمْ، عِنْدِي طَيْرٌ.', ans: 'A' },
+  { animal: ANIMALS[3], q: 'هَلْ عِنْدَكَ مَاعِزٌ؟', optA: 'لَا، لَيْسَ عِنْدِي مَاعِزٌ.', optB: 'نَعَمْ، عِنْدِي إِوَزَّةٌ.', ans: 'A' }
+];
+
+function renderLevel4(el, dIdx) {
+  const d = DIALOGS[dIdx];
+  el.innerHTML = `
+    <div style="font-size:0.95rem; font-weight:800; color:#0284c7;">Level 4 — Percakapan Sederhana (${dIdx+1}/4)</div>
+    <div style="max-width:540px; margin:12px auto; overflow:hidden;">
+      <div class="chat-bubble chat-a">
+        <div style="font-size:0.85rem; color:#0369a1; font-weight:800;">Teman (Ali):</div>
+        <div class="ar" style="font-size:1.6rem; color:#0c4a6e;">${d.q}</div>
+        <button class="btn btn-soft btn-sm" onclick="speakAr('${d.q}')">🔊 Dengar</button>
+      </div>
+      <div style="clear:both;"></div>
+      <div class="stage" style="width:110px; height:110px; margin:10px auto;">${getAnimalSvg(d.animal)}</div>
+    </div>
+
+    <p style="font-weight:800; margin-bottom:8px;">Pilih jawaban yang paling cocok untuk merespons Ali:</p>
+    <div style="display:flex; flex-direction:column; gap:10px; max-width:480px; margin:auto;">
+      <button class="opt-card ar" onclick="checkLvl4(this, 'A', '${d.ans}', ${dIdx}, '${d.optA}')">${d.optA}</button>
+      <button class="opt-card ar" onclick="checkLvl4(this, 'B', '${d.ans}', ${dIdx}, '${d.optB}')">${d.optB}</button>
+    </div>
+    <div id="lvl4-fb" style="font-weight:800; min-height:24px; margin-top:10px;"></div>
+  `;
+}
+
+function checkLvl4(btn, chosen, correct, dIdx, arText) {
+  const fb = document.getElementById('lvl4-fb');
+  if(chosen === correct) {
+    btn.classList.add('correct');
+    addScore(10);
+    speakAr(arText);
+    fb.innerHTML = '<span style="color:#15803d;">Percakapan yang sangat bagus! 🌟</span>';
+    setTimeout(() => {
+      if(dIdx < DIALOGS.length - 1) showView('lvl4', dIdx + 1);
+      else {
+        finishLevel(4);
+        alert('Hebat sekali! Level 4 percakapan selesai!');
+        showView('menu');
+      }
+    }, 1100);
+  } else {
+    btn.classList.add('wrong');
+    AudioEngine.playWrong();
+    fb.innerHTML = '<span style="color:#b91c1c;">Kurang pas dengan pertanyaannya. Coba jawaban satunya!</span>';
+  }
+}
+
+// --- 13. LEVEL 5: HEWAN FAVORITKU & MEMBUAT KALIMAT ---
+function renderLevel5(el) {
+  if(!state.favoriteAnimal) {
+    let listHtml = ANIMALS.map(a => `
+      <div class="opt-card" onclick="selectFavorite('${a.id}')" style="display:flex; flex-direction:column; align-items:center;">
+        <div style="width:70px; height:70px;">${getAnimalSvg(a)}</div>
+        <div class="ar" style="font-size:1.5rem; margin-top:4px;">${a.ar}</div>
+        <div style="font-size:0.9rem; color:#64748b;">${a.idName}</div>
+      </div>
+    `).join('');
+
+    el.innerHTML = `
+      <div style="font-size:0.95rem; font-weight:800; color:#0284c7;">Level 5 — Hewan Favoritku</div>
+      <h3 style="margin:6px 0;">Pilihlah 1 hewan yang paling kamu sukai:</h3>
+      <div class="grid-4">${listHtml}</div>
+    `;
+  } else {
+    const a = state.favoriteAnimal;
+    const kalimatAr = `أُحِبُّ ال${a.ar.replace('ٌ','')}`;
+    const kalimatId = `Saya menyukai ${a.idName.toLowerCase()}.`;
+
+    el.innerHTML = `
+      <div style="font-size:0.95rem; font-weight:800; color:#0284c7;">Level 5 — Kalimat Hewan Favoritku</div>
+      <div class="stage" style="width:150px; height:150px;">${getAnimalSvg(a)}</div>
+      
+      <div class="ar" style="font-size:2.4rem; color:#d96b00; font-weight:700; margin:6px 0;">${kalimatAr}</div>
+      <div style="font-size:1.2rem; font-weight:800; color:#15803d; margin-bottom:12px;">${kalimatId}</div>
+
+      <div style="display:flex; justify-content:center; gap:8px; margin-bottom:16px;">
+        <button class="btn btn-secondary" onclick="speakAr('${kalimatAr}')">🔊 Dengarkan Bahasa Arab</button>
+        <button class="btn btn-soft" onclick="state.favoriteAnimal=null; renderLevel5(document.getElementById('main-content'))">Ganti Hewan</button>
+      </div>
+
+      <button class="btn btn-green" onclick="claimCertificate()">
+        Selesai & Buka Sertifikat Petualang 🎓
+      </button>
+    `;
+  }
+}
+
+function selectFavorite(animalId) {
+  state.favoriteAnimal = ANIMALS.find(a => a.id === animalId);
+  saveData();
+  renderLevel5(document.getElementById('main-content'));
+}
+
+function claimCertificate() {
+  finishLevel(5);
+  addScore(10);
+  showView('cert');
+}
+
+// --- 14. SERTIFIKAT DIGITAL SISWA ---
+function renderCertificate(el) {
+  const d = new Date().toLocaleDateString('id-ID', { year:'numeric', month:'long', day:'numeric' });
+  el.innerHTML = `
+    <div class="cert" id="cert-box">
+      <div class="ar" style="font-size:2rem; color:#b45309; margin-bottom:4px;">شَهَادَةُ تَقْدِيرٍ</div>
+      <h2 style="color:#0284c7; margin:0 0 4px;">SERTIFIKAT PENGHARGAAN</h2>
+      <p style="margin:0; font-weight:800; color:#64748b;">Diberikan dengan bangga kepada:</p>
+      
+      <div style="font-size:2rem; font-weight:800; color:#d97706; margin:10px 0; border-bottom:2px dashed #cbd5e1; display:inline-block; padding:0 24px;">
+        ${state.playerName}
+      </div>
+
+      <p style="font-size:1.05rem; line-height:1.5; max-width:540px; margin:8px auto; font-weight:700;">
+        Telah berhasil menyelesaikan seluruh misi pembelajaran Bahasa Arab dalam petualangan <b>عَالَمُ الْحَيَوَانَاتِ (Alam Hewan)</b> dan meraih gelar:
+      </p>
+
+      <div style="background:#fef3c7; border:2px solid #fde047; border-radius:50px; padding:8px 18px; display:inline-block; font-weight:800; color:#854d0e; font-size:1.15rem; margin:6px 0;">
+        🌟 PETUALANG CILIK BAHASA ARAB 🌟
+      </div>
+
+      <div style="display:flex; justify-content:space-around; margin-top:18px; font-size:0.95rem; font-weight:800; color:#475569;">
+        <div>Tanggal: ${d}</div>
+        <div>Total Skor: ⭐ ${state.score}</div>
+      </div>
+    </div>
+
+    <div style="display:flex; justify-content:center; gap:8px; margin-top:14px; flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="window.print()">🖨️ Cetak / Simpan PDF</button>
+      <button class="btn btn-soft" onclick="showView('menu')">Kembali ke Menu</button>
+    </div>
+  `;
+}
+
+// --- INISIALISASI AWAL SAAT HALAMAN DIBUKA ---
+window.addEventListener('DOMContentLoaded', () => {
+  loadSavedData();
+  showView('cover');
+});
+</script>
+</body>
+</html>
